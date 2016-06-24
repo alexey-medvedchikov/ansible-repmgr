@@ -70,3 +70,22 @@ repmgr_promote_command: repmgr standby promote -f {{ repmgr_conf }}
 repmgr_follow_command: repmgr standby follow -f {{ repmgr_conf }} -W
 repmgr_monitor_interval_secs: 2
 repmgr_retry_promote_interval_secs: 300
+
+# Cron variables:
+
+repmgr_cron: []
+
+# repmgr_cron:
+#   hour: 4
+#   minute: 0
+#   day: *
+#   job: "psql -U postgres repmgr -c \"DELETE * FROM repmgr_test.repl_monitor WHERE last_monitor_time < current_timestamp - interval '4d'\""
+#   name: ""
+#   weekday: *
+#   user: "postgres"
+#   month: *
+#   weekday: *  
+#   disabled: false
+
+# Need cron task or not
+repmgr_cron_status: True
