@@ -1,0 +1,7 @@
+---
+ - name: Removing old records in the repl_monitor table
+   cron:
+     name: "Removing repl_monitor records older than 4 days"
+     minute: "{{ cron_minute }}"
+     hour: "{{ cron_hour }}"
+     job: "{{ cron_job }}"
