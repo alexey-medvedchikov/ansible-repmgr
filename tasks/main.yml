@@ -10,6 +10,7 @@
   when: repmgr_bootstrap|bool
   tags: [repmgr, repmgr-bootstrap]
 
-- include: repl_monitor_cron.yml
-  tags: [repmgr]
+- include: cron_jobs.yml
+  when: repmgr_cron_status
+  tags: [repmgr, repmgr-cron]
 

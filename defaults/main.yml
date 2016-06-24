@@ -72,10 +72,20 @@ repmgr_monitor_interval_secs: 2
 repmgr_retry_promote_interval_secs: 300
 
 # Cron variables:
-cron_hour: 4
-cron_minute: 0
-cron_day: 1
-cron_job: "psql -U postgres repmgr -c \"DELETE * FROM repmgr_test.repl_monitor WHERE last_monitor_time < current_timestamp - interval '4d'\""
-cron_name: ""
-cron_user: "root"
-cron_weekday: 0
+
+repmgr_cron: []
+
+# repmgr_cron:
+#   hour: 4
+#   minute: 0
+#   day: *
+#   job: "psql -U postgres repmgr -c \"DELETE * FROM repmgr_test.repl_monitor WHERE last_monitor_time < current_timestamp - interval '4d'\""
+#   name: ""
+#   weekday: *
+#   user: "postgres"
+#   month: *
+#   weekday: *  
+#   disabled: false
+
+# Need cron task or not
+repmgr_cron_status: True
