@@ -3,7 +3,7 @@
 - name: install required packages
   apt:
     pkg: "{{ item }}"
-    state: latest
+    state: "{{ repmgr_package_state }}"
   with_items: "{{ repmgr_packages }}"
 
 - name: short command wrapper

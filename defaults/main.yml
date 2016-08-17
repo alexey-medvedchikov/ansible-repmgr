@@ -1,4 +1,5 @@
 ---
+repmgr_package_state: present
 
 repmgr_packages:
   - repmgr
