@@ -95,6 +95,7 @@
       --host {{ repmgr_master_node }} \
       --dbname {{ repmgr_db_name }} \
       --user {{ repmgr_db_user }} \
+      --data-dir {{ repmgr_pg_data_dir }} \
       --verbose \
       standby clone
   become_user: "{{ repmgr_user }}"
