@@ -1,5 +1,4 @@
 ---
-
 - name: add password to .pgpass file
   lineinfile:
     dest: "{{ item }}"
@@ -40,3 +39,8 @@
   notify:
     - restart repmgrd
 
+- name: enable IPC termination by a non-system user
+  replace:
+    path: /etc/systemd/logind.conf
+    regexp: '#RemoveIPC=yes'
+    replace: 'RemoveIPC=no'
