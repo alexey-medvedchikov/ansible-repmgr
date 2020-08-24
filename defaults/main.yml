@@ -29,7 +29,7 @@ repmgr_upstream_node:
 repmgr_use_replication_slots: 0
 repmgr_loglevel: NOTICE
 repmgr_logfacility: LOCAL0
-repmgr_logfile:
+repmgr_logfile: /var/log/repmgr/repmgr.log
 
 # Set mandatory on usage
 # repmgr_ssh_private_key:
@@ -60,8 +60,8 @@ repmgr_event_notifications: []
 # repmgr_pg_bindir highly recommend to set up
 repmgr_rsync_options: --archive --checksum --compress --progress --rsh="ssh -o \"StrictHostKeyChecking no\""
 repmgr_ssh_options: -o "StrictHostKeyChecking no"
-repmgr_pg_ctl_options: -s
-repmgr_pg_basebackup_options: --xlog-method=s
+repmgr_pg_ctl_options: "-s"
+repmgr_pg_basebackup_options: "--label=repmgr_backup"
 repmgr_master_response_timeout: 60
 repmgr_reconnect_attempts: 6
 repmgr_reconnect_interval: 10
@@ -71,6 +71,7 @@ repmgr_promote_command: repmgr standby promote -f {{ repmgr_conf }}
 repmgr_follow_command: repmgr standby follow -f {{ repmgr_conf }} -W
 repmgr_monitor_interval_secs: 2
 repmgr_retry_promote_interval_secs: 300
+repmgr_pg_bindir: /usr/bin
 
 # Cron variables:
 
@@ -90,3 +91,13 @@ repmgr_cron: []
 
 # Need cron task or not
 repmgr_cron_status: True
+
+repmgr_witness_repl_nodes_sync_interval_secs: 15
+repmgr_barman_server: backup_server
+repmgr_barman_config: /etc/barman.conf
+
+repmgr_service_start_command: 'sudo pg_ctlcluster 9.6 main start'
+repmgr_service_stop_command: 'sudo pg_ctlcluster 9.6 main stop'
+repmgr_service_restart_command: 'sudo pg_ctlcluster 9.6 main restart'
+repmgr_service_reload_command: 'sudo pg_ctlcluster 9.6 main reload'
+repmgr_service_promote_command: 'sudo pg_ctlcluster 9.6 main promote'
