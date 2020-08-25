@@ -11,17 +11,11 @@
 #
 # repmgr and repmgrd require these items to be configured:
 
-# Cluster name - this will be used by repmgr to generate its internal
-# schema (pattern: "repmgr_{luster}"); while this name will be quoted
-# to preserve case, we recommend using lower case and avoiding whitespace
-# to facilitate easier querying of the repmgr views and tables.
-cluster={{ repmgr_cluster_name }}
-
 # Node ID and name
 # (Note: we recommend to avoid naming nodes after their initial
 #  replication function, as this will cause confusion when e.g.
 #  "standby2" is promoted to primary)
-node={{ repmgr_node_id | mandatory }}           # a unique integer
+node_id={{ repmgr_node_id | mandatory }}           # a unique integer
 node_name={{ repmgr_node_name }}  # an arbitrary (but unique) string; we recommend using
                  # the server's hostname or another identifier unambiguously
                  # associated with the server to avoid confusion
@@ -42,6 +36,12 @@ conninfo='{{ repmgr_conninfo }}'
 #
 #   https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNECT-CONNECT-TIMEOUT
 
+
+data_directory='{{ repmgr_data_directory }}' # The node's data directory. This is needed by repmgr
+				 # when performing operations when the PostgreSQL instance
+				 # is not running and there's no other way of determining
+				 # the data directory.
+
 # Optional configuration items
 # ============================
 
@@ -53,7 +53,7 @@ conninfo='{{ repmgr_conninfo }}'
 # In that case, the upstream node must exist before the new standby
 # can be registered. If 'upstream_node' is not set, then the standby
 # will connect directly to the primary node.
-{% if repmgr_upstream_node %}
+{% if repmgr_upstream_node is defined %}
 upstream_node={{ repmgr_upstream_node }}
 {% endif %}
 
@@ -69,7 +69,7 @@ use_replication_slots={% if repmgr_use_replication_slots | bool %}1{% else %}0{%
 
 # Log level: possible values are DEBUG, INFO, NOTICE, WARNING, ERR, ALERT, CRIT or EMERG
 # (default: NOTICE)
-loglevel={{ repmgr_loglevel }}
+log_level={{ repmgr_log_level }}
 
 # Note that logging facility settings will only apply to `repmgrd` by default;
 # `repmgr` will always write to STDERR unless the switch `--log-to-file` is
@@ -79,13 +79,12 @@ loglevel={{ repmgr_loglevel }}
 
 # Logging facility: possible values are STDERR or - for Syslog integration - one of LOCAL0, LOCAL1, ..., LOCAL7, USER
 # (default: STDERR)
-logfacility={{ repmgr_logfacility }}
+log_facility='{{ repmgr_log_facility }}'
 
 # stderr can be redirected to an arbitrary file:
 #
-#logfile='/var/log/repmgr/repmgr.log'
-{% if repmgr_logfile %}
-logfile={{ repmgr_logfile }}
+{% if repmgr_log_file is defined %}
+log_file='{{ repmgr_log_file }}'
 {% endif %}
 
 # event notifications can be passed to an arbitrary external program
@@ -106,7 +105,7 @@ event_notification_command='{{ repmgr_event_notification_command }}'
 # can be filtered to explicitly named ones:
 #
 {% if repmgr_event_notifications %}
-event_notifications={{ repmgr_event_notifications | join(',') }}
+event_notifications='{{ repmgr_event_notifications | join(',') }}'
 {% endif %}
 
 
@@ -116,8 +115,8 @@ event_notifications={{ repmgr_event_notifications | join(',') }}
 # path to PostgreSQL binary directory (location of pg_ctl, pg_basebackup etc.)
 # (if not provided, defaults to system $PATH)
 #pg_bindir=/usr/bin/
-{% if repmgr_pg_bindir %}
-pg_bindir={{ repmgr_pg_bindir }}
+{% if repmgr_pg_bindir is defined %}
+pg_bindir='{{ repmgr_pg_bindir }}'
 {% endif %}
 
 #
@@ -144,16 +143,16 @@ pg_bindir={{ repmgr_pg_bindir }}
 #       /usr/bin/systemctl restart postgresql-9.5
 #
 
-service_start_command = {{ repmgr_service_start_command }}
-service_stop_command = {{ repmgr_service_stop_command }}
-service_restart_command = {{ repmgr_service_restart_command }}
-service_reload_command = {{ repmgr_service_reload_command }}
-service_promote_command = {{ repmgr_service_promote_command }}
+service_start_command='{{ repmgr_service_start_command }}'
+service_stop_command='{{ repmgr_service_stop_command }}'
+service_restart_command='{{ repmgr_service_restart_command }}'
+service_reload_command='{{ repmgr_service_reload_command }}'
+service_promote_command='{{ repmgr_service_promote_command }}'
 
 # external command options
 
-rsync_options={{ repmgr_rsync_options }}
-ssh_options={{ repmgr_ssh_options }}
+rsync_options='{{ repmgr_rsync_options }}'
+ssh_options='{{ repmgr_ssh_options }}'
 
 # external command arguments. Values shown are examples.
 
@@ -162,15 +161,20 @@ ssh_options={{ repmgr_ssh_options }}
 pg_ctl_options='{{ repmgr_pg_ctl_options }}'
 pg_basebackup_options='{{ repmgr_pg_basebackup_options }}'
 
-# This is the host name of the barman server, which is used for connecting over
-# to the barman server (passwordless ssh keys should be in place)
-#barman_server='backup_server'
-barman_server='{{ repmgr_barman_server }}'
-# If you are placing the barman.conf file in a non-standard path, or using
-# a name other than barman.conf, use this parameter to specify the path and
-# name of the barman configuration file.
-#barman_config='/path/to/barman.conf'
-barman_config='{{ repmgr_barman_config }}'
+# Barman options
+# ----------------------
+
+{% if repmgr_barman_server is defined %}
+barman_server='{{ repmgr_barman_server }}' # The Barman configuration section
+{% endif %}
+{% if repmgr_barman_host is defined %}
+barman_host='{{ repmgr_barman_host }}' # The Barman configuration file on the 
+{% endif %}
+{% if repmgr_barman_config is defined %}
+barman_config='{{ repmgr_barman_config }}' # The Barman configuration file on the
+                                           # Barman server (needed if the file is
+                                           # in a non-standard location)
+{% endif %}
 
 # Standby clone settings
 # ----------------------
@@ -195,10 +199,6 @@ barman_config='{{ repmgr_barman_config }}'
 # monitoring interval in seconds; default is 2
 monitor_interval_secs={{ repmgr_monitor_interval_secs }}
 
-# Maximum number of seconds to wait for a response from the primary server
-# before deciding it has failed.
-master_response_timeout={{ repmgr_master_response_timeout }}
-
 # Number of attempts at what interval (in seconds) to try and
 # connect to  a server to establish its status (e.g. master
 # during failover)
@@ -206,7 +206,7 @@ reconnect_attempts={{ repmgr_reconnect_attempts }}
 reconnect_interval={{ repmgr_reconnect_interval }}
 
 # Autofailover options
-failover={{ repmgr_failover }} # one of 'automatic', 'manual' (default: manual)
+failover='{{ repmgr_failover }}' # one of 'automatic', 'manual' (default: manual)
                     # defines the action to take in the event of upstream failure
                     #
                     # 'automatic': repmgrd will automatically attempt to promote the
@@ -214,7 +214,7 @@ failover={{ repmgr_failover }} # one of 'automatic', 'manual' (default: manual)
                     # 'manual': repmgrd will take no action and the mode will require
                     #    manual attention to reattach it to replication
 
-#priority={{ repmgr_priority }}  # indicate a preferred priorty for promoting nodes
+priority={{ repmgr_priority }}  # indicate a preferred priorty for promoting nodes
                                  # a value of zero or less prevents the node being promoted to primary
                                  # (default: 100)
 
@@ -225,7 +225,7 @@ follow_command='{{ repmgr_follow_command }}'
 # disappears, we wait 'reconnect_attempts' * 'retry_promote_interval_secs'
 # seconds; by default this would be half an hour, as 'retry_promote_interval_secs'
 # default value is 300)
-retry_promote_interval_secs={{ repmgr_retry_promote_interval_secs }}
+primary_notification_timeout={{ repmgr_primary_notification_timeout }}
 
-# Number of seconds after which the witness server resyncs the repl_nodes table
-witness_repl_nodes_sync_interval_secs={{ repmgr_witness_repl_nodes_sync_interval_secs }}
+witness_sync_interval={{ repmgr_witness_sync_internal }}	 # interval (in seconds) to synchronise node records
+				                                                   # to the witness server

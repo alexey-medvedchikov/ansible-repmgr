@@ -1,8 +1,9 @@
 ---
+repmgr_inventory_group: repmgr_cluster_group
 repmgr_package_state: present
 
 repmgr_packages:
-  - repmgr
+  - postgresql-9.6-repmgr
   - python-psycopg2
   - rsync
   - ssh
@@ -12,11 +13,9 @@ repmgr_user: postgres
 repmgr_group: postgres
 repmgr_cluster_group: all
 repmgr_bootstrap: off
-repmgr_pg_data_dir: /var/lib/postgresql/9.4/main
-repmgr_func_path: /usr/share/postgresql/9.4/contrib/repmgr_funcs.sql
+repmgr_data_directory: /var/lib/postgresql/9.6/main
 
-repmgr_cluster_name: test
-# repmgr_node_id must be set
+repmgr_node_id: 01
 repmgr_is_master: off
 repmgr_master_node: "{{ hostvars[groups[repmgr_cluster_group][0]].ansible_default_ipv4.address }}"
 repmgr_node_name: "{{ ansible_default_ipv4.address }}"
@@ -25,11 +24,11 @@ repmgr_db_name: repmgr
 repmgr_db_user: repmgr
 # repmgr_db_password must be set
 repmgr_conninfo: "host={{ repmgr_node_address }} dbname={{ repmgr_db_name }} user={{ repmgr_db_user }}"
-repmgr_upstream_node:
+#repmgr_upstream_node:
 repmgr_use_replication_slots: 0
-repmgr_loglevel: NOTICE
-repmgr_logfacility: LOCAL0
-repmgr_logfile: /var/log/repmgr/repmgr.log
+repmgr_log_level: NOTICE
+repmgr_log_facility: LOCAL0
+#repmgr_log_file: /var/log/repmgr/repmgr.log
 
 # Set mandatory on usage
 # repmgr_ssh_private_key:
@@ -62,7 +61,6 @@ repmgr_rsync_options: --archive --checksum --compress --progress --rsh="ssh -o \
 repmgr_ssh_options: -o "StrictHostKeyChecking no"
 repmgr_pg_ctl_options: "-s"
 repmgr_pg_basebackup_options: "--label=repmgr_backup"
-repmgr_master_response_timeout: 60
 repmgr_reconnect_attempts: 6
 repmgr_reconnect_interval: 10
 repmgr_failover: automatic
@@ -70,7 +68,7 @@ repmgr_priority: 100
 repmgr_promote_command: repmgr standby promote -f {{ repmgr_conf }}
 repmgr_follow_command: repmgr standby follow -f {{ repmgr_conf }} -W
 repmgr_monitor_interval_secs: 2
-repmgr_retry_promote_interval_secs: 300
+repmgr_primary_notification_timeout: 300
 repmgr_pg_bindir: /usr/bin
 
 # Cron variables:
@@ -92,9 +90,12 @@ repmgr_cron: []
 # Need cron task or not
 repmgr_cron_status: True
 
-repmgr_witness_repl_nodes_sync_interval_secs: 15
-repmgr_barman_server: backup_server
-repmgr_barman_config: /etc/barman.conf
+repmgr_witness_sync_internal: 15
+
+# barman
+#repmgr_barman_host: "[server]"
+#repmgr_barman_server: backup_server
+#repmgr_barman_config: /etc/barman.conf
 
 repmgr_service_start_command: 'sudo pg_ctlcluster 9.6 main start'
 repmgr_service_stop_command: 'sudo pg_ctlcluster 9.6 main stop'
