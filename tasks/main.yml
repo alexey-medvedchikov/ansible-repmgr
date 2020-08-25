@@ -13,4 +13,3 @@
 - include: cron_jobs.yml
   when: repmgr_cron_status
   tags: [repmgr, repmgr-cron]
-

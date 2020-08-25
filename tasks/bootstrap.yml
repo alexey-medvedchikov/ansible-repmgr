@@ -36,7 +36,7 @@
 - name: collect ssh fingerprints
   shell: >
     ssh-keyscan
-    {% for host in groups[repmgr_cluster_group] %}
+    {% for host in groups[repmgr_inventory_group] %}
     {{ hostvars[host].ansible_default_ipv4.address }}
     {% endfor %}
   register: __ssh_fingerprints
@@ -57,6 +57,7 @@
     password: "{{ repmgr_db_password | mandatory }}"
     role_attr_flags: SUPERUSER
     state: present
+  become_user: "{{ repmgr_user }}"
   when: repmgr_is_master|bool
 
 - name: create database for repmgr
@@ -65,14 +66,11 @@
     owner: "{{ repmgr_db_user }}"
     template: "template0"
     state: present
-  when: repmgr_is_master|bool
-
-- name: install repmgr functions
-  shell: psql -U {{ repmgr_db_user }} -f {{ repmgr_func_path }} {{ repmgr_db_name }}
+  become_user: "{{ repmgr_user }}"
   when: repmgr_is_master|bool
 
 - name: register master node
-  shell: repmgrctl master register
+  shell: /usr/local/bin/repmgrctl primary register
   become_user: "{{ repmgr_user }}"
   when: repmgr_is_master|bool
 
@@ -84,20 +82,20 @@
 
 - name: clean out pgdata directory on slave
   file:
-    path: "{{ repmgr_pg_data_dir }}"
+    path: "{{ repmgr_data_directory }}"
     state: absent
   when: not repmgr_is_master|bool
 
 - name: clone standby from master
   shell: |
-    repmgrctl \
-      --force \
-      --host {{ repmgr_master_node }} \
-      --dbname {{ repmgr_db_name }} \
-      --user {{ repmgr_db_user }} \
-      --data-dir {{ repmgr_pg_data_dir }} \
+    /usr/local/bin/repmgrctl \
+      -h {{ repmgr_master_node }} \
+      -U {{ repmgr_db_user }} \
+      -d {{ repmgr_db_name }} \
+      -f {{ repmgr_conf }} \
       --verbose \
-      standby clone
+      standby clone \
+      --force \
   become_user: "{{ repmgr_user }}"
   when: not repmgr_is_master|bool
 
@@ -108,7 +106,7 @@
   when: not repmgr_is_master|bool
 
 - name: register standby server
-  shell: repmgrctl standby register
+  shell: /usr/local/bin/repmgrctl standby register
   become_user: "{{ repmgr_user }}"
   when: not repmgr_is_master|bool
 
@@ -130,4 +128,3 @@
     name: repmgrd
     enabled: true
     state: started
-
