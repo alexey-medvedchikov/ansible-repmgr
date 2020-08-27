@@ -12,11 +12,12 @@ repmgr_conf: /etc/repmgr.conf
 repmgr_user: postgres
 repmgr_group: postgres
 repmgr_cluster_group: all
-repmgr_bootstrap: off
+repmgr_bootstrap: no
 repmgr_data_directory: /var/lib/postgresql/9.6/main
 
+repmgr_is_witness: no
 repmgr_node_id: 01
-repmgr_is_master: off
+repmgr_is_master: no
 repmgr_master_node: "{{ hostvars[groups[repmgr_cluster_group][0]].ansible_default_ipv4.address }}"
 repmgr_node_name: "{{ ansible_default_ipv4.address }}"
 repmgr_node_address: "{{ ansible_default_ipv4.address }}"
