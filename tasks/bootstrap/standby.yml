@@ -1,6 +1,6 @@
 ---
 - name: shutdown standby server
-  service:
+  systemd:
     name: postgresql
     state: stopped
 

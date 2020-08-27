@@ -1,22 +1,22 @@
 ---
 
 - name: start repmgrd
-  service:
+  systemd:
     name: repmgrd
     state: started
 
 - name: stop repmgrd
-  service:
+  systemd:
     name: repmgrd
-    state: stop
+    state: stopped
 
 - name: restart repmgrd
-  service:
+  systemd:
     name: repmgrd
     state: restarted
 
 - name: reload repmgrd
-  service:
+  systemd:
     name: repmgrd
     state: reloaded
 

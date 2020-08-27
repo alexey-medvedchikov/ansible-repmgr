@@ -23,7 +23,6 @@
     - repmgr_is_witness|bool
 
 - name: repmgrd service start
-  service:
+  systemd:
     name: repmgrd
-    enabled: true
     state: started
