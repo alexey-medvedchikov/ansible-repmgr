@@ -1,0 +1,17 @@
+---
+- name: install required packages to configure apt repo
+  apt:
+    pkg:
+      - lsb-release
+      - apt-transport-https
+    state: present
+
+- name: add an apt key by id from a keyserver
+  apt_key:
+    data: "{{ repmgr_repo_key }}"
+
+- name: add repmgr apt repository
+  apt_repository:
+    repo: "{{ repmgr_repo_source }}"
+    filename: repmgr
+    state: present

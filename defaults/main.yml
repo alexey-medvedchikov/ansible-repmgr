@@ -3,6 +3,7 @@ repmgr_inventory_group: repmgr_cluster_group
 repmgr_package_state: present
 
 repmgr_packages:
+  - 2ndquadrant-repository-keys
   - postgresql-9.6-repmgr
   - python-psycopg2
   - rsync
@@ -103,3 +104,39 @@ repmgr_service_stop_command: 'sudo pg_ctlcluster 9.6 main stop'
 repmgr_service_restart_command: 'sudo pg_ctlcluster 9.6 main restart'
 repmgr_service_reload_command: 'sudo pg_ctlcluster 9.6 main reload'
 repmgr_service_promote_command: 'sudo pg_ctlcluster 9.6 main promote'
+
+repmgr_repo_source: "deb [arch=amd64] https://dl.2ndquadrant.com/default/release/apt stretch-2ndquadrant main"
+repmgr_repo_packages:
+  - lsb-release
+  - apt-tranport-https
+repmgr_repo_key: |
+  -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+  mQINBFqpNU0BEAC6tFZf3Vt5FB4sG0pDeomVypnxTudww/bFm4ZWg3NsP4tnhaao
+  ngO32/ExyyhLbYSIVsQIHYPEamzLJbJwCDTxMLE2x7NrXbC0xeel0Ku7YQcL5VZC
+  EWNJapAIgynao5nTlPMxV4U5TT2BWT2FlbyyRUCn9ng6VvTuxMczF9yKtP4ITKwy
+  DWe4EGJmxumFyiMzjH3QN96PT+kUfPgDbf6oQfCCZAauVzTpXmkWpt1bw5BlDpXF
+  gEx7bLYufaHobVmchrsE+fNGRTvByeWp5sXE+YCeOJWFwL5chSRSP/M5xMFR3C8C
+  k6OVT0z2h7a/8ftZMIa3L5Fuc6oQxPY3XZe0JP4jOfqhBw0I2IEffW9yEKqh6GkS
+  VK1JaDFnS3KkCKXvTgNCOuZENfSC44rycrOfnPz9r3l4WQgUyOL8FdLq/oas/G97
+  M2DiUQYK9GkQkjarNzIzklfPByqkNSUHr7uSV0NiWQdlrm47uxg2ILC+k9aiAl5N
+  /3zR0W2pyjp9C1FqAY/VFa9m1+WNmWHHmFEgEU2mORymb9/WqUGpJ033zZqmQrwC
+  PkbmYjY2zYgY2vaPHpaUa+sJb7Blph334NOUI9Z37+vaHP/4VlmH8XikRZ58kSPk
+  i5npwKUwWhrA794Smq27DB1GlFYG3L2whkVuAm37tW/1G85hPynZAPLAWwARAQAB
+  tD5QdWJsaWMgcmVwb3NpdG9yeSBzaWduaW5nIGtleSAybmRRdWFkcmFudCA8Y2lA
+  Mm5kcXVhZHJhbnQuY29tPokCVQQTAQgAPwIbAwYLCQgHAwIGFQgCCQoLBBYCAwEC
+  HgECF4AWIQSFZTBc6n0LZkkz0lCZBM1L1rrwwwUCXmZSbwUJB3+EIgAKCRCZBM1L
+  1rrwwz96D/9mjAzbovXnfI8E8zPVkW9eImZxcDml47c+yG5c3w1VihO6PAseXnH7
+  eL+U+Nz76d1tAjg2LtifYgWl4zHIdTntYfYgBciA+gbfDZiKZrBZvchguVbAs4Ib
+  cNyycwJuzz8vhsCkjfBmftAlCfbxSfd0pRCzCZ4A0eoacekSLI1ENqwU9sS8iXp0
+  63fxNo5Dq1VQIpBQkacKsQwvjevJyTBcyVDVPEP65ttQB5oiIVdm9o+r22h5Fpr6
+  xggr0Z9XeffglZ9pNhKX9e/H+ftXsUhamN1lWNruJUghafb8NbBtZN3HYIbJ71Gm
+  z6dm7CNm3iJ2+JdJs03Qbj9OB5x30pVxqqdaa+A8GaiCQjNoEmfwTnPJLFbpMYlx
+  /MXrP1stNdBeupJm8iZyhmq96vwrp+3MMERxwA/F87OY8m5k9NP1MZ3F/o7di9NC
+  9t0VW0CW6ya9pIqOGHRjl+DxIUPMeI5VaKEjgVqmeUecLOwVMVEzbBC+HHwObamU
+  JrJpqNfO6Zd6yrRH/14bm2ih7LfMe8iQtKD+NkT8XvAXRx/kh8npFZDFcjn9LXX3
+  lQSXuWWYoric0QWfimJQLcuGTeHrsEH9hcGfoqwN6klCJZzfNMk+brLXozQh8v7l
+  itR4SvorOuEdUtQdENcHl7j+1xP1/91c486WuJgVY/CQVW0d4/H+1Q==
+  =RHyK
+
+  -----END PGP PUBLIC KEY BLOCK-----

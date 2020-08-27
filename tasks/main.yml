@@ -1,4 +1,6 @@
 ---
+- include: repo.yml
+  tags: repmgr-repo
 
 - include: install.yml
   tags: repmgr-install
