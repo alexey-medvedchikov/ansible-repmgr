@@ -1,0 +1,29 @@
+---
+- name: shutdown standby server
+  service:
+    name: postgresql
+    state: stopped
+
+- name: clean out pgdata directory on slave
+  file:
+    path: "{{ repmgr_data_directory }}"
+    state: absent
+
+- name: clone standby from master
+  shell: |
+    /usr/local/bin/repmgrctl \
+      -h {{ repmgr_master_node }} \
+      -U {{ repmgr_db_user }} \
+      -d {{ repmgr_db_name }} \
+      --verbose \
+      standby clone \
+      --force
+  become_user: "{{ repmgr_user }}"
+
+- name: start standby server
+  shell: repmgr node service --action start
+  become_user: "{{ repmgr_user }}"
+
+- name: register standby server
+  shell: /usr/local/bin/repmgrctl standby register --force
+  become_user: "{{ repmgr_user }}"

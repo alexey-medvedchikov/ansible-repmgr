@@ -1,0 +1,52 @@
+---
+- name: create ssh directory
+  file:
+    path: ~{{ repmgr_user }}/.ssh
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    mode: 0755
+    state: directory
+
+- name: private ssh rsa key
+  copy:
+    dest: ~{{ repmgr_user }}/.ssh/id_rsa
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    mode: 0600
+    content: "{{ repmgr_ssh_private_key | mandatory }}"
+
+- name: public ssh rsa key
+  copy:
+    dest: ~{{ repmgr_user }}/.ssh/id_rsa.pub
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    mode: 0600
+    content: "{{ repmgr_ssh_public_key | mandatory }}"
+
+- name: ssh authorized keys
+  lineinfile:
+    dest: ~{{ repmgr_user }}/.ssh/authorized_keys
+    create: yes
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    mode: 0600
+    line: "{{ repmgr_ssh_public_key | mandatory }}"
+
+- name: collect ssh fingerprints
+  shell: >
+    ssh-keyscan
+    {% for host in groups[repmgr_inventory_group] %}
+    {{ hostvars[host].ansible_default_ipv4.address }}
+    {% endfor %}
+  register: __ssh_fingerprints
+  ignore_errors: yes
+
+- name: ssh known_hosts
+  lineinfile:
+    dest: ~{{ repmgr_user }}/.ssh/known_hosts
+    create: yes
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    mode: 0600
+    line: "{{ item }}"
+  with_items: __ssh_fingerprints.stdout_lines

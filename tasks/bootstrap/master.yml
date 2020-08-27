@@ -1,0 +1,4 @@
+---
+- name: register master node
+  shell: /usr/local/bin/repmgrctl primary register --force
+  become_user: "{{ repmgr_user }}"
