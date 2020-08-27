@@ -1,0 +1,17 @@
+[Unit]
+Description=Replication Manager for PostgreSQL clusters
+Documentation=https://repmgr.org/docs/
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ repmgr_repmgrd_binary }} --config-file {{ repmgr_conf }} --daemonize=false {{ repmgr_repmgrd_opts }}
+PIDFile=/var/run/repmgrd.pid
+Restart=on-failure
+User=postgres
+Group=postgres
+
+ExecStop=/bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy=multi-user.target

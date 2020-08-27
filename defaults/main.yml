@@ -105,6 +105,9 @@ repmgr_service_restart_command: 'sudo pg_ctlcluster 9.6 main restart'
 repmgr_service_reload_command: 'sudo pg_ctlcluster 9.6 main reload'
 repmgr_service_promote_command: 'sudo pg_ctlcluster 9.6 main promote'
 
+repmgr_repmgrd_binary: /usr/lib/postgresql/9.6/bin/repmgrd
+repmgr_repmgrd_opts: "--monitoring-history --verbose"
+
 repmgr_repo_source: "deb [arch=amd64] https://dl.2ndquadrant.com/default/release/apt stretch-2ndquadrant main"
 repmgr_repo_packages:
   - lsb-release

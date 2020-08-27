@@ -20,3 +20,6 @@
     name: repmgrd
     state: reloaded
 
+- name: systemd daemon-reload
+  systemd:
+    daemon_reload: yes
