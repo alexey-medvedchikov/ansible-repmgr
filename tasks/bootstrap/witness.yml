@@ -1,0 +1,24 @@
+---
+- name: create user for repmgr
+  postgresql_user:
+    name: "{{ repmgr_db_user }}"
+    password: "{{ repmgr_db_password | mandatory }}"
+    role_attr_flags: SUPERUSER
+    state: present
+  become_user: "{{ repmgr_user }}"
+
+- name: create database for repmgr
+  postgresql_db:
+    name: "{{ repmgr_db_name }}"
+    owner: "{{ repmgr_db_user }}"
+    template: "template0"
+    state: present
+  become_user: "{{ repmgr_user }}"
+
+- name: start witness
+  shell: repmgr node service --action start
+  become_user: "{{ repmgr_user }}"
+
+- name: register witness
+  shell: repmgr witness register -h {{ repmgr_master_node }} --force
+  become_user: "{{ repmgr_user }}"

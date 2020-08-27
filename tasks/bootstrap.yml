@@ -1,133 +1,29 @@
 ---
+- meta: flush_handlers 
 
-- name: create ssh directory
-  file:
-    path: ~{{ repmgr_user }}/.ssh
-    owner: "{{ repmgr_user }}"
-    group: "{{ repmgr_group }}"
-    mode: 0755
-    state: directory
+- include: bootstrap/ssh.yml
+  tags: repmgr-bootstrap-ssh
 
-- name: private ssh rsa key
-  copy:
-    dest: ~{{ repmgr_user }}/.ssh/id_rsa
-    owner: "{{ repmgr_user }}"
-    group: "{{ repmgr_group }}"
-    mode: 0600
-    content: "{{ repmgr_ssh_private_key | mandatory }}"
+- include: bootstrap/user.yml
+  tags: repmgr-bootstrap-user
 
-- name: public ssh rsa key
-  copy:
-    dest: ~{{ repmgr_user }}/.ssh/id_rsa.pub
-    owner: "{{ repmgr_user }}"
-    group: "{{ repmgr_group }}"
-    mode: 0600
-    content: "{{ repmgr_ssh_public_key | mandatory }}"
-
-- name: ssh authorized keys
-  lineinfile:
-    dest: ~{{ repmgr_user }}/.ssh/authorized_keys
-    create: yes
-    owner: "{{ repmgr_user }}"
-    group: "{{ repmgr_group }}"
-    mode: 0600
-    line: "{{ repmgr_ssh_public_key | mandatory }}"
-
-- name: collect ssh fingerprints
-  shell: >
-    ssh-keyscan
-    {% for host in groups[repmgr_cluster_group] %}
-    {{ hostvars[host].ansible_default_ipv4.address }}
-    {% endfor %}
-  register: __ssh_fingerprints
-
-- name: ssh known_hosts
-  lineinfile:
-    dest: ~{{ repmgr_user }}/.ssh/known_hosts
-    create: yes
-    owner: "{{ repmgr_user }}"
-    group: "{{ repmgr_group }}"
-    mode: 0600
-    line: "{{ item }}"
-  with_items: __ssh_fingerprints.stdout_lines
-
-- name: create user for repmgr
-  postgresql_user:
-    name: "{{ repmgr_db_user }}"
-    password: "{{ repmgr_db_password | mandatory }}"
-    role_attr_flags: SUPERUSER
-    state: present
+- include: bootstrap/master.yml
+  tags: repmgr-bootstrap-master
   when: repmgr_is_master|bool
 
-- name: create database for repmgr
-  postgresql_db:
-    name: "{{ repmgr_db_name }}"
-    owner: "{{ repmgr_db_user }}"
-    template: "template0"
-    state: present
-  when: repmgr_is_master|bool
+- include: bootstrap/standby.yml
+  tags: repmgr-bootstrap-standby
+  when:
+    - not repmgr_is_master|bool
+    - not repmgr_is_witness|bool
 
-- name: install repmgr functions
-  shell: psql -U {{ repmgr_db_user }} -f {{ repmgr_func_path }} {{ repmgr_db_name }}
-  when: repmgr_is_master|bool
-
-- name: register master node
-  shell: repmgrctl master register
-  become_user: "{{ repmgr_user }}"
-  when: repmgr_is_master|bool
-
-- name: shutdown standby server
-  service:
-    name: postgresql
-    state: stopped
-  when: not repmgr_is_master|bool
-
-- name: clean out pgdata directory on slave
-  file:
-    path: "{{ repmgr_pg_data_dir }}"
-    state: absent
-  when: not repmgr_is_master|bool
-
-- name: clone standby from master
-  shell: |
-    repmgrctl \
-      --force \
-      --host {{ repmgr_master_node }} \
-      --dbname {{ repmgr_db_name }} \
-      --user {{ repmgr_db_user }} \
-      --data-dir {{ repmgr_pg_data_dir }} \
-      --verbose \
-      standby clone
-  become_user: "{{ repmgr_user }}"
-  when: not repmgr_is_master|bool
-
-- name: start standby server
-  service:
-    name: postgresql
-    state: started
-  when: not repmgr_is_master|bool
-
-- name: register standby server
-  shell: repmgrctl standby register
-  become_user: "{{ repmgr_user }}"
-  when: not repmgr_is_master|bool
-
-- name: FIXME -- wait for standby node information to appear in replicated db
-  shell: |
-    RETRY=0
-    while true; do
-      RETRY=$(($RETRY + 1))
-      COUNT=$(psql -qAt -U {{ repmgr_db_user }} \
-        -c 'SELECT COUNT(1) FROM repmgr_test.repl_nodes WHERE id={{ repmgr_node_id }}' \
-        {{ repmgr_db_name }})
-      test $COUNT -ge 1 && exit 0
-      test $RETRY -ge 15 && exit 1
-      sleep 1
-    done
+- include: bootstrap/witness.yml
+  tags: repmgr-bootstrap-witness
+  when:
+    - repmgr_is_witness|bool
 
 - name: repmgrd service start
   service:
     name: repmgrd
     enabled: true
     state: started
-
