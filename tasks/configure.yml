@@ -1,4 +1,14 @@
 ---
+
+- name: ensure log directory exists
+  file:
+    state: directory
+    name: "{{ repmgr_log_file | dirname }}"
+    owner: "{{ repmgr_user }}"
+    group: "{{ repmgr_group }}"
+    recurse: yes
+  when: repmgr_log_file is defined
+
 - name: add password to .pgpass file
   lineinfile:
     dest: "{{ item }}"
