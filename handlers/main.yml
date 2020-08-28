@@ -15,11 +15,6 @@
     name: repmgrd
     state: restarted
 
-- name: reload repmgrd
-  systemd:
-    name: repmgrd
-    state: reloaded
-
 - name: systemd daemon-reload
   systemd:
     daemon_reload: yes

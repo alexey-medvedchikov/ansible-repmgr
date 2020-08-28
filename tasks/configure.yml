@@ -15,7 +15,6 @@
     dest: /lib/systemd/system/repmgrd.service
     mode: 0644
   notify:
-    - reload repmgrd
     - systemd daemon-reload
 
 - name: add password to .pgpass file
